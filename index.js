@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { View, StyleSheet, Image, TouchableOpacity, Platform } from 'react-native';
+import { View, StyleSheet, Image, TouchableOpacity, Platform, ImageBackground } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Video from 'react-native-video'; // eslint-disable-line
 
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   seekBar: {
     alignItems: 'center',
     height: 30,
-    flexGrow: 1,
+    flex: 1,
     flexDirection: 'row',
     paddingHorizontal: 10,
     marginLeft: -10,
@@ -89,6 +89,7 @@ export default class VideoPlayer extends Component {
     this.state = {
       isStarted: props.autoplay,
       isPlaying: props.autoplay,
+      isFullScreen: false,
       width: 200,
       progress: 0,
       isMuted: props.defaultMuted,
@@ -164,10 +165,12 @@ export default class VideoPlayer extends Component {
     }
 
     if (this.props.endWithThumbnail) {
+      if (this.state.isFullScreen) {
+        this.player.dismissFullscreenPlayer()
+        this.setState({isFullScreen: false})
+      }
       this.setState({ isStarted: false });
     }
-
-    this.setState({ progress: 1 });
 
     this.player.seek(0);
     if (!this.props.loop) {
@@ -202,6 +205,7 @@ export default class VideoPlayer extends Component {
 
   onToggleFullScreen() {
     this.player.presentFullscreenPlayer();
+    this.setState({isFullScreen: true})
   }
 
   onSeekBarLayout({ nativeEvent }) {
@@ -303,7 +307,7 @@ export default class VideoPlayer extends Component {
   renderThumbnail() {
     const { thumbnail, style, customStyles, ...props } = this.props;
     return (
-      <Image
+      <ImageBackground
         {...props}
         style={[
           styles.thumbnail,
@@ -314,7 +318,7 @@ export default class VideoPlayer extends Component {
         source={thumbnail}
       >
         {this.renderStartButton()}
-      </Image>
+      </ImageBackground>
     );
   }
 
@@ -332,7 +336,7 @@ export default class VideoPlayer extends Component {
       >
         <View
           style={[
-            { flexGrow: this.state.progress },
+            { flex: this.state.progress },
             styles.seekBarProgress,
             customStyles.seekBarProgress,
           ]}
@@ -356,7 +360,7 @@ export default class VideoPlayer extends Component {
         ) : null }
         <View style={[
           styles.seekBarBackground,
-          { flexGrow: 1 - this.state.progress },
+          { flex: 1 - this.state.progress },
           customStyles.seekBarBackground,
         ]} />
       </View>
